@@ -1,19 +1,18 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Starfighter: Alien Incursion</title>
+    <title>Dank Starfighter: Brainrot Sector</title>
     <style>
         :root {
-            --neon-cyan: #00f3ff;
-            --neon-magenta: #ff007f;
-            --neon-green: #00ff66;
-            --neon-yellow: #ffe600;
-            --neon-purple: #b026ff;
-            --bg-dark: #04020a;
-            --text-font: 'Courier New', Courier, monospace;
+            --neon-cyan: #00ffff;
+            --neon-magenta: #ff003c;
+            --neon-green: #39ff14;
+            --neon-yellow: #fffb00;
+            --neon-purple: #8a2be2; /* Lean */
+            --bg-dark: #0a0005;
+            --text-font: 'Impact', 'Courier New', sans-serif;
         }
 
         * {
@@ -27,19 +26,25 @@
         body, html {
             width: 100%;
             height: 100%;
-            background-color: var(--bg-dark);
+            background-color: #000;
             overflow: hidden;
             font-family: var(--text-font);
             color: #ffffff;
+            display: flex;
+            justify-content: center;
         }
 
         #game-container {
             position: relative;
             width: 100%;
+            max-width: 650px;
             height: 100%;
+            background: radial-gradient(circle at center, #11000a 0%, #000000 100%);
+            border-left: 2px solid rgba(255, 0, 60, 0.5);
+            border-right: 2px solid rgba(138, 43, 226, 0.5);
+            box-shadow: 0 0 40px rgba(255, 0, 60, 0.2), 0 0 40px rgba(138, 43, 226, 0.2);
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
         }
 
         canvas {
@@ -51,7 +56,7 @@
         }
 
         #bg-canvas { z-index: 1; }
-        #game-canvas { z-index: 2; }
+        #game-canvas { z-index: 2; filter: contrast(1.1) saturate(1.2); }
 
         #ui-layer {
             position: absolute;
@@ -67,11 +72,11 @@
         }
 
         #hud {
-            padding: 18px 24px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            text-shadow: 0 0 8px var(--neon-cyan);
+            text-shadow: 2px 2px 0px #000;
             pointer-events: auto;
         }
 
@@ -79,79 +84,105 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+            flex: 1;
         }
 
         .hud-title {
             font-size: 0.85rem;
-            color: #88a;
+            color: #ccc;
             letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .hud-value {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: bold;
-            color: var(--neon-cyan);
+            color: var(--neon-yellow);
+            text-shadow: 0 0 10px var(--neon-yellow), 2px 2px 0 #000;
+            letter-spacing: 1px;
+        }
+
+        #progress-wrapper {
+            width: 100%;
+            max-width: 200px;
+            height: 12px;
+            border: 2px solid #fff;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--neon-magenta);
+            box-shadow: 0 0 10px var(--neon-magenta);
+            transition: width 0.3s ease;
         }
 
         #health-container {
-            width: 160px;
+            width: 120px;
             height: 14px;
-            border: 2px solid var(--neon-magenta);
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.6);
-            box-shadow: 0 0 10px var(--neon-magenta);
-            overflow: hidden;
+            border: 2px solid var(--neon-green);
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 10px var(--neon-green);
             margin-top: 4px;
         }
 
         #health-bar {
             height: 100%;
             width: 100%;
-            background: var(--neon-magenta);
-            box-shadow: 0 0 10px var(--neon-magenta);
+            background: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green);
             transition: width 0.25s ease, background 0.3s;
         }
 
-        #pause-btn {
-            background: transparent;
+        .icon-btn-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        #pause-btn, #mute-btn {
+            background: rgba(0,0,0,0.5);
             border: 2px solid var(--neon-cyan);
             color: var(--neon-cyan);
             font-family: inherit;
-            font-size: 1rem;
-            padding: 6px 16px;
+            font-size: 0.9rem;
+            padding: 4px 12px;
             cursor: pointer;
-            border-radius: 4px;
             box-shadow: 0 0 8px var(--neon-cyan);
-            text-shadow: 0 0 5px var(--neon-cyan);
             transition: all 0.2s;
+            text-transform: uppercase;
         }
-
-        #pause-btn:hover {
-            background: rgba(0, 243, 255, 0.2);
-        }
+        #mute-btn { padding: 4px 10px; }
+        #pause-btn:hover, #mute-btn:hover { background: var(--neon-cyan); color: #000; }
+        #mute-btn.is-muted { color: #666; border-color: #666; box-shadow: none; text-decoration: line-through; }
 
         #wave-banner {
             position: absolute;
             top: 25%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 2.2rem;
-            font-weight: bold;
-            color: var(--neon-yellow);
-            text-shadow: 0 0 15px var(--neon-yellow);
-            letter-spacing: 4px;
+            font-size: 2.5rem;
+            color: var(--neon-magenta);
+            text-shadow: 0 0 20px var(--neon-magenta), 3px 3px 0 #000;
+            letter-spacing: 2px;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.4s ease, transform 0.4s ease;
+            text-align: center;
+            width: 100%;
+            text-transform: uppercase;
         }
 
         #active-powerup {
             font-size: 1rem;
-            font-weight: bold;
             color: var(--neon-green);
-            text-shadow: 0 0 8px var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green), 2px 2px 0 #000;
             opacity: 0;
             transition: opacity 0.3s;
+            margin-top: 5px;
+            text-transform: uppercase;
         }
 
         .menu-screen {
@@ -162,76 +193,123 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: rgba(4, 2, 10, 0.9);
-            padding: 35px 45px;
-            border: 2px solid var(--neon-cyan);
-            border-radius: 12px;
-            box-shadow: 0 0 25px rgba(0, 243, 255, 0.4), inset 0 0 15px rgba(0, 243, 255, 0.2);
+            background: rgba(10, 0, 5, 0.95);
+            padding: 30px;
+            border: 4px solid var(--neon-purple);
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.5), inset 0 0 20px rgba(138, 43, 226, 0.2);
             text-align: center;
             pointer-events: auto;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(10px);
             z-index: 20;
-            max-width: 90%;
+            width: 90%;
+            max-width: 450px;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .hidden { display: none !important; }
 
         .title {
-            font-size: 2.6rem;
-            font-weight: bold;
-            color: var(--neon-cyan);
-            text-shadow: 0 0 12px var(--neon-cyan);
-            margin-bottom: 8px;
+            font-size: 2.2rem;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 15px var(--neon-magenta), 3px 3px 0 #000;
+            margin-bottom: 5px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
 
         .subtitle {
             font-size: 1rem;
-            color: #aaa;
-            margin-bottom: 25px;
+            color: #ddd;
+            margin-bottom: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .skin-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .skin-btn {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #555;
+            color: #fff;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        .skin-btn.active, .skin-btn:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px var(--neon-green);
+            color: var(--neon-green);
+            background: rgba(57, 255, 20, 0.1);
         }
 
         .menu-btn {
-            background: transparent;
-            border: 2px solid var(--neon-magenta);
-            color: var(--neon-magenta);
+            background: var(--neon-purple);
+            border: 2px solid #fff;
+            color: #fff;
             font-family: inherit;
-            font-size: 1.3rem;
-            font-weight: bold;
-            padding: 12px 36px;
+            font-size: 1.2rem;
+            padding: 12px 30px;
             cursor: pointer;
-            border-radius: 6px;
-            box-shadow: 0 0 12px var(--neon-magenta);
-            text-shadow: 0 0 6px var(--neon-magenta);
+            box-shadow: 0 0 15px var(--neon-purple), 4px 4px 0 #000;
             transition: all 0.2s;
             text-transform: uppercase;
-            margin-top: 18px;
+            margin-top: 10px;
         }
-
         .menu-btn:hover {
             background: var(--neon-magenta);
-            color: var(--bg-dark);
-            box-shadow: 0 0 22px var(--neon-magenta);
+            box-shadow: 0 0 25px var(--neon-magenta), 4px 4px 0 #000;
+            transform: scale(1.05);
+        }
+
+        .upgrade-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        .upgrade-btn {
+            background: rgba(0,0,0,0.8);
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+            white-space: pre-wrap;
+            line-height: 1.4;
+            font-size: 1rem;
+            padding: 15px 10px;
+            width: 100%;
+        }
+        .upgrade-btn:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-cyan);
         }
 
         #mobile-controls {
             display: none;
             width: 100%;
-            padding: 15px 25px 25px 25px;
+            padding: 15px 25px;
             justify-content: space-between;
             pointer-events: auto;
         }
 
-        .control-group {
-            display: flex;
-            gap: 15px;
-        }
+        .control-group { display: flex; gap: 15px; }
 
         .mobile-btn {
-            background: rgba(0, 243, 255, 0.1);
-            border: 2px solid var(--neon-cyan);
-            color: var(--neon-cyan);
+            background: rgba(255, 0, 60, 0.2);
+            border: 3px solid var(--neon-magenta);
+            color: var(--neon-magenta);
             width: 65px;
             height: 65px;
             border-radius: 50%;
@@ -239,32 +317,32 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 12px var(--neon-cyan);
             touch-action: none;
+            text-shadow: 2px 2px 0 #000;
+            box-shadow: 0 0 10px var(--neon-magenta);
         }
-
         .mobile-btn:active {
-            background: rgba(0, 243, 255, 0.4);
-            transform: scale(0.92);
+            background: var(--neon-magenta);
+            color: #000;
+            transform: scale(0.9);
         }
 
         .shoot-btn {
-            border-color: var(--neon-magenta);
-            color: var(--neon-magenta);
-            box-shadow: 0 0 12px var(--neon-magenta);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
             width: 75px;
             height: 75px;
         }
-
-        .shoot-btn:active {
-            background: rgba(255, 0, 127, 0.4);
-        }
+        .shoot-btn:active { background: var(--neon-cyan); color: #000; }
 
         @media (max-width: 768px) {
             #mobile-controls { display: flex; }
             .title { font-size: 1.8rem; }
-            .hud-value { font-size: 1.1rem; }
-            #health-container { width: 110px; }
+            .hud { padding: 10px; }
+            #health-container { width: 90px; }
+            .hud-group { align-items: center; text-align: center; }
+            #progress-wrapper { max-width: 120px; }
         }
     </style>
 </head>
@@ -276,137 +354,163 @@
 
     <div id="ui-layer">
         <div id="hud">
-            <div class="hud-group">
-                <span class="hud-title">SCORE</span>
+            <div class="hud-group" style="align-items: flex-start;">
+                <span class="hud-title">SOCIAL CREDIT</span>
                 <span id="score" class="hud-value">0</span>
-                <span class="hud-title">RECORD: <span id="high-score" style="color:var(--neon-green)">0</span></span>
+                <span class="hud-title">PEAK AUTISM: <span id="high-score" style="color:var(--neon-green)">0</span></span>
             </div>
+            
             <div class="hud-group" style="align-items: center;">
-                <span class="hud-title">CURRENT SECTOR</span>
-                <span id="level" class="hud-value" style="color: var(--neon-yellow);">WAVE 1</span>
-                <div id="active-powerup">TRIPLE BARRAGE</div>
+                <span class="hud-title">BRAINROT LVL</span>
+                <span id="level" class="hud-value" style="color: var(--neon-cyan);">WAVE 1</span>
+                <div id="progress-wrapper">
+                    <div id="progress-bar"></div>
+                </div>
+                <div id="active-powerup"></div>
             </div>
+            
             <div class="hud-group" style="align-items: flex-end;">
-                <button id="pause-btn">PAUSE</button>
+                <div class="icon-btn-row">
+                    <button id="mute-btn" title="Toggle sound">SND</button>
+                    <button id="pause-btn" title="Pause game">TOUCH GRASS</button>
+                </div>
+                <span class="hud-title" style="margin-top: 5px;">SANITY</span>
                 <div id="health-container">
                     <div id="health-bar"></div>
                 </div>
             </div>
         </div>
 
-        <div id="wave-banner">WAVE 1: INVASION BEGINS</div>
+        <div id="wave-banner">WAVE 1: THE SIMPS ARRIVE</div>
 
         <div id="mobile-controls">
             <div class="control-group">
                 <div class="mobile-btn" id="btn-left">◀</div>
                 <div class="mobile-btn" id="btn-right">▶</div>
             </div>
-            <div class="mobile-btn shoot-btn" id="btn-shoot">⚡</div>
+            <div class="mobile-btn shoot-btn" id="btn-shoot">FIRE</div>
         </div>
     </div>
 
     <!-- Menus -->
     <div id="start-menu" class="menu-screen">
-        <h1 class="title">Neon Starfighter</h1>
-        <p class="subtitle">Alien Vanguard Intercept</p>
-        <p style="font-size:0.9rem; color:#bbb; line-height: 1.5;">
-            Movement: <b>[A] / [D]</b> or <b>[Left] / [Right]</b><br>
-            Multi-Round Laser: <b>[Spacebar]</b>
+        <h1 class="title">DANK STARFIGHTER</h1>
+        <p class="subtitle">Survive the Brainrot</p>
+        
+        <h3 style="margin-bottom: 10px; font-size: 1.1rem; color: var(--neon-green); text-shadow: 1px 1px 0 #000;">CHOOSE YOUR FIGHTER</h3>
+        <div class="skin-selector">
+            <button class="skin-btn active" data-skin="doomer">Doomer</button>
+            <button class="skin-btn" data-skin="troll">Trollface</button>
+            <button class="skin-btn" data-skin="pepe">Pepe</button>
+            <button class="skin-btn" data-skin="sus">Sussy Baka</button>
+        </div>
+
+        <p style="font-size:0.9rem; color:#ddd; line-height: 1.5; margin-bottom: 15px; font-family:'Courier New', monospace;">
+            Move: <b>[A] / [D]</b> or <b>[Left] / [Right]</b><br>
+            Shoot: <b>[Spacebar]</b> &nbsp;|&nbsp; Grass: <b>[P]</b>
         </p>
-        <button class="menu-btn" id="start-btn">Launch Ship</button>
+        <button class="menu-btn" id="start-btn">ENTER OHIO</button>
+    </div>
+
+    <!-- Level Up Menu -->
+    <div id="level-up-menu" class="menu-screen hidden">
+        <h1 class="title" style="color: var(--neon-green);">VIBE CHECK PASSED</h1>
+        <p class="subtitle" style="color: #fff;">Pick your poison:</p>
+        <div class="upgrade-container">
+            <button class="menu-btn upgrade-btn" id="upg-btn-1"></button>
+            <button class="menu-btn upgrade-btn" id="upg-btn-2"></button>
+        </div>
     </div>
 
     <div id="pause-menu" class="menu-screen hidden">
-        <h1 class="title">Tactical Pause</h1>
-        <button class="menu-btn" id="resume-btn">Engage</button>
+        <h1 class="title">TOUCHING GRASS...</h1>
+        <button class="menu-btn" id="resume-btn">BACK TO BASEMENT</button>
     </div>
 
     <div id="game-over-menu" class="menu-screen hidden">
-        <h1 class="title" style="color: var(--neon-magenta); text-shadow: 0 0 20px var(--neon-magenta);">Ship Destroyed</h1>
-        <p style="font-size: 1.2rem; margin: 10px 0;">Final Score: <span id="final-score" style="color: var(--neon-cyan); font-weight:bold;">0</span></p>
-        <p id="new-highscore-msg" class="hidden" style="color: var(--neon-yellow); font-weight: bold; margin-bottom: 10px;">★ NEW HIGH SCORE ★</p>
-        <button class="menu-btn" id="restart-btn">Deploy Again</button>
+        <h1 class="title" style="color: var(--neon-magenta);">SKILL ISSUE</h1>
+        <p style="font-size: 1.2rem; margin: 10px 0; color: #fff;">Social Credit: <span id="final-score" style="color: var(--neon-yellow); font-weight:bold;">0</span></p>
+        <p id="new-highscore-msg" class="hidden" style="color: var(--neon-green); font-weight: bold; margin-bottom: 10px;">★ TOUCH GRASS IMMINENT ★</p>
+        <button class="menu-btn" id="restart-btn">RESPAWN IN OHIO</button>
     </div>
 </div>
 
 <script>
+// ==========================================
+// 1. DANK AUDIO SYNTHESIZER
+// ==========================================
 const Sound = {
     ctx: null,
+    muted: false,
     init() {
         if (!this.ctx) {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             this.ctx = new AudioContext();
         }
-        if (this.ctx.state === 'suspended') {
-            this.ctx.resume();
-        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
     },
+    // Pew sound - chaotic pitch
     playMultiLaser() {
-        if (!this.ctx) return;
-        const pitches = [950, 800, 1100];
-        pitches.forEach((freq, idx) => {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            const start = this.ctx.currentTime + (idx * 0.02);
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(freq, start);
-            osc.frequency.exponentialRampToValueAtTime(150, start + 0.1);
-            gain.gain.setValueAtTime(0.04, start);
-            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.1);
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start(start);
-            osc.stop(start + 0.1);
-        });
-    },
-    playAlienExplosion(isLarge = false) {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'triangle';
-        const startFreq = isLarge ? 220 : 380;
-        osc.frequency.setValueAtTime(startFreq, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(20, this.ctx.currentTime + (isLarge ? 0.45 : 0.25));
-        gain.gain.setValueAtTime(isLarge ? 0.2 : 0.12, this.ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + (isLarge ? 0.45 : 0.25));
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + (isLarge ? 0.45 : 0.25));
-    },
-    playPowerup() {
-        if (!this.ctx) return;
-        const notes = [440, 554, 659, 880];
-        notes.forEach((freq, i) => {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            const time = this.ctx.currentTime + (i * 0.07);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, time);
-            gain.gain.setValueAtTime(0.08, time);
-            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start(time);
-            osc.stop(time + 0.15);
-        });
-    },
-    playHit() {
-        if (!this.ctx) return;
+        if (!this.ctx || this.muted) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'square';
+        osc.frequency.setValueAtTime(600 + Math.random()*200, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.1);
+    },
+    // Vine boom approximation (deep hit)
+    playHit() {
+        if (!this.ctx || this.muted) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(120, this.ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(40, this.ctx.currentTime + 0.12);
-        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime); // LOUD
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+    },
+    // Sad trombone / Bruh sound for death
+    playAlienExplosion(isLarge = false) {
+        if (!this.ctx || this.muted) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = isLarge ? 'square' : 'triangle';
+        const startFreq = isLarge ? 150 : 250;
+        osc.frequency.setValueAtTime(startFreq, this.ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(30, this.ctx.currentTime + (isLarge ? 0.5 : 0.2));
+        gain.gain.setValueAtTime(isLarge ? 0.25 : 0.15, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + (isLarge ? 0.5 : 0.2));
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + (isLarge ? 0.5 : 0.2));
+    },
+    // MLG Airhorn / Level up
+    playPowerup() {
+        if (!this.ctx || this.muted) return;
+        const notes = [600, 800, 600, 1000];
+        notes.forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const time = this.ctx.currentTime + (i * 0.1);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, time);
+            gain.gain.setValueAtTime(0.1, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(time); osc.stop(time + 0.2);
+        });
     }
 };
 
+// ==========================================
+// 2. CANVAS & SIZING SYSTEM
+// ==========================================
+const container = document.getElementById('game-container');
 const bgCanvas = document.getElementById('bg-canvas');
 const bgCtx = bgCanvas.getContext('2d');
 const gameCanvas = document.getElementById('game-canvas');
@@ -414,168 +518,152 @@ const ctx = gameCanvas.getContext('2d');
 
 let cw, ch;
 function resize() {
-    cw = window.innerWidth;
-    ch = window.innerHeight;
-    bgCanvas.width = cw;
-    bgCanvas.height = ch;
-    gameCanvas.width = cw;
-    gameCanvas.height = ch;
+    const oldCw = cw;
+    cw = container.clientWidth; ch = container.clientHeight;
+    bgCanvas.width = cw; bgCanvas.height = ch;
+    gameCanvas.width = cw; gameCanvas.height = ch;
+    if (oldCw && oldCw > 0 && typeof player !== 'undefined' && player.x) {
+        player.x = (player.x / oldCw) * cw;
+    }
 }
 window.addEventListener('resize', resize);
-resize();
 
-const STATE = { MENU: 0, PLAYING: 1, PAUSED: 2, GAMEOVER: 3 };
+const STATE = { MENU: 0, PLAYING: 1, PAUSED: 2, GAMEOVER: 3, LEVELUP: 4 };
 let currentState = STATE.MENU;
-let lastTime = 0;
+let lastTime = 0, globalTime = 0;
 
-let score = 0;
-let highScore = localStorage.getItem('alienInvasion_hi') || 0;
-let wave = 1;
+let score = 0, highScore = 0, wave = 1;
+let currentSkin = 'doomer';
 
-let stars = [];
-let bullets = [];
-let aliens = [];
-let particles = [];
-let powerups = [];
-
+let wavePointsNeeded = 500, currentWavePoints = 0;
+let bullets = [], aliens = [], particles = [], powerups = [];
 const keys = { ArrowLeft: false, ArrowRight: false, a: false, d: false, Space: false };
 
-const scoreEl = document.getElementById('score');
-const highScoreEl = document.getElementById('high-score');
-const levelEl = document.getElementById('level');
-const healthBar = document.getElementById('health-bar');
-const activePowerupEl = document.getElementById('active-powerup');
-const waveBanner = document.getElementById('wave-banner');
+const scoreEl = document.getElementById('score'), highScoreEl = document.getElementById('high-score');
+const levelEl = document.getElementById('level'), healthBar = document.getElementById('health-bar');
+const activePowerupEl = document.getElementById('active-powerup'), waveBanner = document.getElementById('wave-banner');
+const progressBar = document.getElementById('progress-bar'), muteBtn = document.getElementById('mute-btn');
 
-highScoreEl.innerText = highScore;
-
-class Star {
-    constructor(randomY = false) {
-        this.x = Math.random() * cw;
-        this.y = randomY ? Math.random() * ch : -10;
-        this.size = Math.random() * 2 + 0.5;
-        this.speed = (Math.random() * 0.7 + 0.2) * this.size;
-        this.color = Math.random() > 0.8 ? '#00f3ff' : '#ffffff';
-    }
-    update(dt) {
-        this.y += this.speed * (dt / 16.6);
-        if (this.y > ch) {
-            this.y = -5;
-            this.x = Math.random() * cw;
+async function loadHighScore() {
+    try {
+        const result = await window.storage.get('dankStar_hi', false);
+        if (result && result.value) {
+            const parsed = parseInt(result.value, 10);
+            if (!isNaN(parsed)) highScore = parsed;
         }
-    }
-    draw(context) {
-        context.fillStyle = this.color;
-        context.beginPath();
-        context.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        context.fill();
-    }
+    } catch (e) { }
+    highScoreEl.innerText = highScore;
+}
+loadHighScore();
+
+async function saveHighScore(value) {
+    try { await window.storage.set('dankStar_hi', String(value), false); } catch (e) { }
 }
 
+document.querySelectorAll('.skin-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.skin-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentSkin = e.target.dataset.skin;
+    });
+});
+
+muteBtn.addEventListener('click', () => {
+    Sound.muted = !Sound.muted;
+    muteBtn.classList.toggle('is-muted', Sound.muted);
+});
+
+// ==========================================
+// 3. BACKGROUND (Blood Red / Lean Grid)
+// ==========================================
+function drawNeonGrid(ctx, dtTime) {
+    ctx.strokeStyle = 'rgba(255, 0, 60, 0.2)'; // Blood red
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const spacing = 60;
+    for (let x = (cw % spacing)/2; x <= cw; x += spacing) { ctx.moveTo(x, 0); ctx.lineTo(x, ch); }
+    let offset = (dtTime * 0.15) % spacing;
+    for (let y = offset; y <= ch; y += spacing) { ctx.moveTo(0, y); ctx.lineTo(cw, y); }
+    ctx.stroke();
+}
+
+// ==========================================
+// 4. ENTITIES (Particles & Bullets)
+// ==========================================
 class Particle {
     constructor(x, y, color, speedMultiplier = 1) {
-        this.x = x;
-        this.y = y;
-        this.color = color;
+        this.x = x; this.y = y; this.color = color;
         const angle = Math.random() * Math.PI * 2;
-        const speed = (Math.random() * 3.5 + 1) * speedMultiplier;
-        this.vx = Math.cos(angle) * speed;
-        this.vy = Math.sin(angle) * speed;
-        this.life = 1.0;
-        this.decay = Math.random() * 0.02 + 0.02;
-        this.size = Math.random() * 3 + 1.5;
+        const speed = (Math.random() * 5 + 2) * speedMultiplier;
+        this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
+        this.life = 1.0; this.decay = Math.random() * 0.04 + 0.02;
+        this.size = Math.random() * 4 + 2;
     }
     update(dt) {
         const factor = dt / 16.6;
-        this.x += this.vx * factor;
-        this.y += this.vy * factor;
+        this.x += this.vx * factor; this.y += this.vy * factor;
         this.life -= this.decay * factor;
     }
     draw(context) {
         context.save();
+        context.globalCompositeOperation = 'lighter';
         context.globalAlpha = Math.max(0, this.life);
         context.fillStyle = this.color;
-        context.shadowBlur = 10;
-        context.shadowColor = this.color;
-        context.beginPath();
-        context.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        context.fill();
+        context.beginPath(); context.arc(this.x, this.y, this.size, 0, Math.PI * 2); context.fill();
         context.restore();
     }
 }
 
-function spawnAlienExplosion(x, y, color, count = 20, isBig = false) {
-    for (let i = 0; i < count; i++) {
-        particles.push(new Particle(x, y, color, isBig ? 1.8 : 1.0));
-    }
+function spawnExplosion(x, y, color, count = 15, isBig = false) {
+    for (let i = 0; i < count; i++) particles.push(new Particle(x, y, color, isBig ? 1.5 : 1.0));
 }
 
 class Bullet {
     constructor(x, y, vx, vy, color = '#00f3ff') {
-        this.x = x;
-        this.y = y;
-        this.vx = vx;
-        this.vy = vy;
-        this.width = 4;
-        this.height = 14;
-        this.color = color;
-        this.markedForDeletion = false;
+        this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+        this.width = 6; this.height = 18;
+        this.color = color; this.markedForDeletion = false;
         this.angle = Math.atan2(vy, vx) + Math.PI / 2;
     }
     update(dt) {
         const factor = dt / 16.6;
-        this.x += this.vx * factor;
-        this.y += this.vy * factor;
-        if (this.y < -30 || this.x < -30 || this.x > cw + 30) {
-            this.markedForDeletion = true;
-        }
+        this.x += this.vx * factor; this.y += this.vy * factor;
+        if (this.y < -30 || this.x < -30 || this.x > cw + 30 || this.y > ch + 30) this.markedForDeletion = true;
     }
     draw(context) {
         context.save();
-        context.translate(this.x, this.y);
-        context.rotate(this.angle);
-        context.shadowBlur = 12;
-        context.shadowColor = this.color;
+        context.translate(this.x, this.y); context.rotate(this.angle);
         context.fillStyle = this.color;
         context.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
         context.restore();
     }
 }
 
+// ==========================================
+// 5. PLAYER (Twin Blaster Mechanic & Meme Skins)
+// ==========================================
 const player = {
-    x: 0,
-    y: 0,
-    width: 44,
-    height: 48,
-    speed: 6.5,
-    health: 100,
-    maxHealth: 100,
-    recoil: 0,
-    lastShot: 0,
-    fireDelay: 220,
-    powerups: {
-        rapidFire: 0,
-        shield: 0,
-        doubleScore: 0
-    },
+    x: 0, y: 0, width: 50, height: 50,
+    speed: 10, health: 100, maxHealth: 100, recoil: 0, lastShot: 0, fireDelay: 160,
+    powerups: { rapidFire: 0, immunity: 0, doubleScore: 0 },
+    animTime: 0, extraShots: 0,
 
     init() {
-        this.x = cw / 2;
-        this.y = ch - 85;
-        this.health = this.maxHealth;
-        this.recoil = 0;
-        this.powerups = { rapidFire: 0, shield: 0, doubleScore: 0 };
+        this.x = cw / 2; this.y = ch - 80;
+        this.health = 100; this.maxHealth = 100; this.recoil = 0;
+        this.powerups = { rapidFire: 0, immunity: 0, doubleScore: 0 };
+        this.speed = 10; this.fireDelay = 160; this.extraShots = 0;
         this.updateHealthUI();
     },
 
     update(dt, now) {
         const factor = dt / 16.6;
+        this.animTime += 0.1 * factor;
         const moveDist = this.speed * factor;
 
         if (keys.ArrowLeft || keys.a) this.x -= moveDist;
         if (keys.ArrowRight || keys.d) this.x += moveDist;
 
-        // Wrap around feature (Slide back into the game from the other side)
         const half = this.width / 2;
         if (this.x < -half) this.x = cw + half;
         if (this.x > cw + half) this.x = -half;
@@ -593,38 +681,36 @@ const player = {
             }
         }
 
-        const currentDelay = this.powerups.rapidFire > 0 ? this.fireDelay * 0.55 : this.fireDelay;
+        const currentDelay = this.powerups.rapidFire > 0 ? this.fireDelay * 0.45 : this.fireDelay;
         if (keys.Space && (now - this.lastShot) > currentDelay) {
-            this.fireMultiRoundSalvo();
+            this.fireTwinBlasters();
             this.lastShot = now;
-            this.recoil = 5;
+            this.recoil = 8;
         }
     },
 
-    fireMultiRoundSalvo() {
+    fireTwinBlasters() {
         Sound.playMultiLaser();
         const topY = this.y - this.height / 2 + this.recoil;
         const isRapid = this.powerups.rapidFire > 0;
-        const bulletColor = isRapid ? '#ffe600' : '#00f3ff';
+        const bulletColor = isRapid ? '#fffb00' : '#00ffff'; // Dew vs Diamond
+        const speedMag = isRapid ? 18 : 15;
 
-        if (isRapid) {
-            const spreadAngles = [-18, -9, 0, 9, 18];
-            spreadAngles.forEach(deg => {
-                const rad = (deg * Math.PI) / 180;
-                const speed = 10;
-                const vx = Math.sin(rad) * speed;
-                const vy = -Math.cos(rad) * speed;
-                bullets.push(new Bullet(this.x, topY, vx, vy, bulletColor));
-            });
-        } else {
-            const spreadAngles = [-10, 0, 10];
-            spreadAngles.forEach(deg => {
-                const rad = (deg * Math.PI) / 180;
-                const speed = 9.5;
-                const vx = Math.sin(rad) * speed;
-                const vy = -Math.cos(rad) * speed;
-                bullets.push(new Bullet(this.x, topY, vx, vy, bulletColor));
-            });
+        let pairs = 1 + this.extraShots; 
+        let spreadAngle = 35; 
+        
+        for(let i = 0; i < pairs; i++) {
+            let angle = 0;
+            if (pairs > 1) angle = -spreadAngle/2 + (spreadAngle / (pairs - 1)) * i;
+            let rad = angle * Math.PI / 180;
+            
+            let vx = Math.sin(rad) * speedMag;
+            let vy = -Math.cos(rad) * speedMag;
+            let offsetX = Math.cos(rad) * 15; 
+            let offsetY = Math.sin(rad) * 15; 
+            
+            bullets.push(new Bullet(this.x - offsetX, topY - offsetY, vx, vy, bulletColor));
+            bullets.push(new Bullet(this.x + offsetX, topY + offsetY, vx, vy, bulletColor));
         }
     },
 
@@ -632,66 +718,66 @@ const player = {
         context.save();
         context.translate(this.x, this.y + this.recoil);
 
-        if (this.powerups.shield > 0) {
-            context.beginPath();
-            context.arc(0, 0, this.width * 0.95, 0, Math.PI * 2);
-            context.fillStyle = 'rgba(0, 243, 255, 0.15)';
+        // Plot Armor Shield Bubble (Tinfoil / Cyan glow)
+        if (this.powerups.immunity > 0) {
+            context.beginPath(); context.arc(0, 0, this.width * 1.3, 0, Math.PI * 2);
+            context.fillStyle = `rgba(0, 255, 255, ${0.2 + Math.sin(this.animTime*3)*0.1})`; 
             context.fill();
-            context.lineWidth = 2.5;
-            context.strokeStyle = '#00f3ff';
-            context.shadowBlur = 18;
-            context.shadowColor = '#00f3ff';
+            context.lineWidth = 4; context.strokeStyle = '#00ffff';
             context.stroke();
         }
 
-        context.shadowBlur = 15;
-        context.shadowColor = '#00f3ff';
-        context.fillStyle = '#0a192f';
-        context.strokeStyle = '#00f3ff';
-        context.lineWidth = 2;
-
-        context.beginPath();
-        context.moveTo(0, -this.height / 2);
-        context.lineTo(this.width / 2, this.height / 2);
-        context.lineTo(this.width / 4, this.height / 3);
-        context.lineTo(0, this.height / 2 - 4);
-        context.lineTo(-this.width / 4, this.height / 3);
-        context.lineTo(-this.width / 2, this.height / 2);
-        context.closePath();
-        context.fill();
-        context.stroke();
-
-        context.fillStyle = '#00ff66';
-        context.shadowColor = '#00ff66';
-        context.beginPath();
-        context.ellipse(0, -this.height / 8, 4, 10, 0, 0, Math.PI * 2);
-        context.fill();
-
-        context.fillStyle = '#ff007f';
-        context.shadowColor = '#ff007f';
-        context.beginPath();
-        const thrusterLength = 8 + Math.random() * 8;
-        context.moveTo(-8, this.height / 3);
-        context.lineTo(0, this.height / 3 + thrusterLength);
-        context.lineTo(8, this.height / 3);
-        context.fill();
+        // MEME SKINS
+        if (currentSkin === 'doomer') {
+            // Grey head, black beanie, cig
+            context.fillStyle = '#ccc';
+            context.beginPath(); context.arc(0, 5, 20, 0, Math.PI*2); context.fill();
+            context.fillStyle = '#222';
+            context.beginPath(); context.arc(0, 0, 20, Math.PI, 0); context.fill();
+            context.fillRect(-20, -5, 40, 10);
+            context.fillStyle = '#000'; context.fillRect(-8, 5, 4, 4); context.fillRect(4, 5, 4, 4); // dead eyes
+            context.strokeStyle = '#fff'; context.lineWidth=2; context.beginPath(); context.moveTo(-10, 15); context.lineTo(10, 20); context.stroke(); // cig
+            context.fillStyle = '#ff3300'; context.beginPath(); context.arc(12, 21, 3, 0, Math.PI*2); context.fill(); // cherry glow
+        } 
+        else if (currentSkin === 'troll') {
+            // White circle, jagged smile
+            context.fillStyle = '#fff'; context.strokeStyle = '#000'; context.lineWidth = 2;
+            context.beginPath(); context.arc(0, 0, 22, 0, Math.PI*2); context.fill(); context.stroke();
+            context.fillStyle = '#000'; 
+            context.beginPath(); context.arc(-8, -5, 3, 0, Math.PI*2); context.fill();
+            context.beginPath(); context.arc(8, -5, 3, 0, Math.PI*2); context.fill();
+            context.beginPath(); context.moveTo(-15, 10); context.lineTo(-5, 15); context.lineTo(5, 10); context.lineTo(15, 15); context.stroke(); // smile
+        } 
+        else if (currentSkin === 'pepe') {
+            // Green frog, big eyes, red lips
+            context.fillStyle = '#39ff14'; context.beginPath(); context.ellipse(0, 5, 22, 15, 0, 0, Math.PI*2); context.fill();
+            context.fillStyle = '#fff'; context.beginPath(); context.arc(-10, -8, 10, 0, Math.PI*2); context.arc(10, -8, 10, 0, Math.PI*2); context.fill();
+            context.fillStyle = '#000'; context.beginPath(); context.arc(-10, -5, 3, 0, Math.PI*2); context.arc(10, -5, 3, 0, Math.PI*2); context.fill();
+            context.strokeStyle = '#ff003c'; context.lineWidth = 3; context.beginPath(); context.moveTo(-10, 15); context.quadraticCurveTo(0, 20, 10, 15); context.stroke();
+        } 
+        else if (currentSkin === 'sus') {
+            // Amogus bean + knife
+            context.fillStyle = '#ff003c'; context.beginPath(); context.roundRect(-15, -20, 30, 40, 15); context.fill();
+            context.fillStyle = '#00ffff'; context.beginPath(); context.roundRect(-5, -12, 25, 14, 7); context.fill();
+            context.fillStyle = '#888'; context.fillRect(-25, 5, 10, 25); // knife handle/blade
+            context.fillStyle = '#ccc'; context.fillRect(-25, -15, 10, 20); // blade
+            context.fillStyle = '#ff0000'; context.beginPath(); context.arc(-20, -15, 4, 0, Math.PI*2); context.fill(); // blood
+        }
 
         context.restore();
     },
 
     takeDamage(amount) {
-        if (this.powerups.shield > 0) {
-            this.powerups.shield = 0;
-            spawnAlienExplosion(this.x, this.y, '#00f3ff', 25);
+        if (this.powerups.immunity > 0) {
+            spawnExplosion(this.x, this.y, '#00ffff', 10);
             Sound.playHit();
-            refreshPowerupDisplay();
             return;
         }
 
         this.health -= amount;
         Sound.playHit();
-        gameCanvas.style.filter = 'drop-shadow(0 0 15px red)';
-        setTimeout(() => gameCanvas.style.filter = 'none', 90);
+        container.style.boxShadow = 'inset 0 0 80px red';
+        setTimeout(() => container.style.boxShadow = '0 0 40px rgba(255,0,60,0.2), 0 0 40px rgba(138,43,226,0.2)', 100);
 
         if (this.health <= 0) {
             this.health = 0;
@@ -709,12 +795,17 @@ const player = {
     }
 };
 
+// ==========================================
+// 6. ALIENS (The Brainrot Horde)
+// ==========================================
 const ALIEN_SPECIES = {
-    SCOUT: { type: 'scout', color: '#00ff66', size: 32, hp: 2, speed: 1.8, scoreVal: 15 },
-    SQUID: { type: 'squid', color: '#ff007f', size: 38, hp: 4, speed: 2.2, scoreVal: 30 },
-    SWARMER: { type: 'swarmer', color: '#ffe600', size: 26, hp: 2, speed: 3.8, scoreVal: 40 },
-    DREADNOUGHT: { type: 'dreadnought', color: '#b026ff', size: 58, hp: 12, speed: 1.1, scoreVal: 100 }
+    SCOUT: { type: 'soyjak', color: '#dddddd', size: 35, hp: 2, speed: 2.5, scoreVal: 15 },
+    SQUID: { type: 'mod', color: '#ffbbbb', size: 40, hp: 4, speed: 2.8, scoreVal: 30 },
+    SWARMER: { type: 'glowie', color: '#fffb00', size: 30, hp: 2, speed: 5.0, scoreVal: 40 },
+    DREADNOUGHT: { type: 'boss', color: '#000000', size: 65, hp: 18, speed: 1.6, scoreVal: 100 }
 };
+
+const DIFFICULTY_CAP_WAVE = 20;
 
 class Alien {
     constructor(speciesTemplate, waveMultiplier) {
@@ -722,19 +813,19 @@ class Alien {
         this.color = speciesTemplate.color;
         this.width = speciesTemplate.size;
         this.height = speciesTemplate.size;
-        
-        // Progressive Spacing: Clustered in the center early on, spreading out completely later.
-        let spreadFactor = Math.min(1.0, 0.35 + (wave * 0.15));
+
+        const scalingWave = Math.min(wave, DIFFICULTY_CAP_WAVE);
+        let spreadFactor = Math.min(1.0, 0.4 + (wave * 0.15));
         let availableWidth = cw - (this.width * 2);
         let activeWidth = availableWidth * spreadFactor;
         let startX = (cw / 2) - (activeWidth / 2);
         
         this.x = startX + (Math.random() * activeWidth);
-        this.y = -this.height - 10;
+        this.y = -this.height - 10 - (Math.random() * 40);
         
-        this.maxHp = Math.round(speciesTemplate.hp * (1 + (wave - 1) * 0.18));
+        this.maxHp = Math.round(speciesTemplate.hp * (1 + (scalingWave - 1) * 0.18));
         this.hp = this.maxHp;
-        this.speed = (speciesTemplate.speed + (wave - 1) * 0.15) * waveMultiplier;
+        this.speed = (speciesTemplate.speed + (scalingWave - 1) * 0.15) * waveMultiplier;
         this.scoreVal = speciesTemplate.scoreVal;
         
         this.markedForDeletion = false;
@@ -747,257 +838,193 @@ class Alien {
         this.animTimer += 0.08 * factor;
         this.y += this.speed * factor;
 
-        if (this.type === 'squid') {
-            this.x = this.initialX + Math.sin(this.animTimer * 1.5) * 45;
-        } else if (this.type === 'swarmer') {
-            this.x += Math.cos(this.animTimer * 3.5) * 3;
-        }
+        // Erratic patterns
+        if (this.type === 'mod') this.x = this.initialX + Math.sin(this.animTimer * 1.5) * 40;
+        else if (this.type === 'glowie') this.x += Math.cos(this.animTimer * 4.5) * 6;
 
         if (this.y > ch + this.height) {
             this.markedForDeletion = true;
-            player.takeDamage(12);
+            player.takeDamage(15);
         }
     }
 
     draw(context) {
         context.save();
         context.translate(this.x, this.y);
-        context.shadowBlur = 14;
-        context.shadowColor = this.color;
-        context.strokeStyle = this.color;
-        context.fillStyle = this.color;
-        context.lineWidth = 2.2;
-
         const time = this.animTimer;
 
-        if (this.type === 'scout') {
-            context.beginPath();
-            context.ellipse(0, 0, this.width / 2.5, this.height / 2, 0, 0, Math.PI * 2);
-            context.stroke();
+        if (this.type === 'soyjak') {
+            context.fillStyle = '#ffdbac'; context.beginPath(); context.arc(0, 0, 18, 0, Math.PI*2); context.fill();
+            context.strokeStyle = '#000'; context.lineWidth = 2; context.strokeRect(-12, -8, 10, 10); context.strokeRect(2, -8, 10, 10); // glasses
+            context.fillStyle = '#000'; context.beginPath(); context.ellipse(0, 8, 8, 10, 0, 0, Math.PI*2); context.fill(); // screaming mouth
 
-            const antAngle = Math.sin(time * 3) * 0.2;
-            context.beginPath();
-            context.moveTo(-6, -this.height / 2);
-            context.lineTo(-14 + antAngle * 10, -this.height / 2 - 10);
-            context.moveTo(6, -this.height / 2);
-            context.lineTo(14 - antAngle * 10, -this.height / 2 - 10);
-            context.stroke();
+        } else if (this.type === 'mod') {
+            context.fillStyle = '#ffe0bd'; context.beginPath(); context.arc(0, 5, 20, 0, Math.PI*2); context.fill();
+            context.fillStyle = '#555'; context.beginPath(); context.arc(0, 22, 10, 0, Math.PI, false); context.fill(); // neckbeard
+            context.fillStyle = '#222'; context.fillRect(-22, -10, 44, 5); context.fillRect(-15, -25, 30, 15); // fedora
+            context.strokeStyle = '#fff'; context.lineWidth = 1; context.strokeRect(-15, -25, 30, 15);
 
-            context.fillStyle = '#ffffff';
-            context.beginPath();
-            context.arc(-7, -4, 3.5, 0, Math.PI * 2);
-            context.arc(7, -4, 3.5, 0, Math.PI * 2);
-            context.fill();
+        } else if (this.type === 'glowie') {
+            // Illuminati eye
+            context.fillStyle = '#39ff14'; context.beginPath(); context.moveTo(0, -18); context.lineTo(-20, 18); context.lineTo(20, 18); context.fill();
+            context.fillStyle = '#fff'; context.beginPath(); context.arc(0, 5, 8, 0, Math.PI*2); context.fill();
+            context.fillStyle = '#000'; context.beginPath(); context.arc(0, 5, 3, 0, Math.PI*2); context.fill();
 
-        } else if (this.type === 'squid') {
-            context.beginPath();
-            context.arc(0, -4, this.width / 2.2, Math.PI, 0, false);
-            context.lineTo(this.width / 2.2, 4);
-            context.lineTo(-this.width / 2.2, 4);
-            context.closePath();
-            context.stroke();
-
-            context.fillStyle = '#ffffff';
-            context.beginPath();
-            context.ellipse(0, -6, 8, 3 + Math.sin(time * 2) * 1.5, 0, 0, Math.PI * 2);
-            context.fill();
-
-            context.beginPath();
-            for (let i = -2; i <= 2; i++) {
-                const startX = i * 6;
-                const waveOffset = Math.sin(time * 2.5 + i) * 6;
-                context.moveTo(startX, 4);
-                context.quadraticCurveTo(startX + waveOffset, 12, startX - waveOffset, 20);
-            }
-            context.stroke();
-
-        } else if (this.type === 'swarmer') {
-            const wingWarp = Math.sin(time * 6) * 12;
-
-            context.beginPath();
-            context.moveTo(-4, -2);
-            context.lineTo(-this.width / 1.5, -8 + wingWarp);
-            context.lineTo(-6, 8);
-            context.moveTo(4, -2);
-            context.lineTo(this.width / 1.5, -8 - wingWarp);
-            context.lineTo(6, 8);
-            context.stroke();
-
-            context.beginPath();
-            context.moveTo(0, -12);
-            context.lineTo(6, 4);
-            context.lineTo(0, 14); 
-            context.lineTo(-6, 4);
-            context.closePath();
-            context.fill();
-
-        } else if (this.type === 'dreadnought') {
-            context.beginPath();
-            context.ellipse(0, 0, this.width / 1.8, this.height / 2.8, 0, 0, Math.PI * 2);
-            context.stroke();
-
-            context.beginPath();
-            context.moveTo(-this.width / 2, 0);
-            context.lineTo(-this.width / 1.3, -12);
-            context.lineTo(-this.width / 2.5, 8);
-            context.moveTo(this.width / 2, 0);
-            context.lineTo(this.width / 1.3, -12);
-            context.lineTo(this.width / 2.5, 8);
-            context.stroke();
-
-            for (let i = 0; i < 4; i++) {
-                const nodeAngle = time + (i * Math.PI / 2);
-                const nx = Math.cos(nodeAngle) * (this.width / 2.4);
-                const ny = Math.sin(nodeAngle) * (this.height / 4.5);
-                context.fillStyle = '#00f3ff';
-                context.beginPath();
-                context.arc(nx, ny, 3, 0, Math.PI * 2);
-                context.fill();
-            }
-
-            context.fillStyle = '#ff007f';
-            context.beginPath();
-            context.arc(0, 0, 6, 0, Math.PI * 2);
-            context.fill();
+        } else if (this.type === 'boss') {
+            // Massive shadow with REAL SHIT glowing red eyes
+            context.fillStyle = '#111'; context.beginPath(); context.arc(0, 0, 32, 0, Math.PI*2); context.fill();
+            
+            // Glowing lens flares
+            context.globalCompositeOperation = 'lighter';
+            const flareW = 25 + Math.sin(time*5)*10;
+            context.fillStyle = 'rgba(255, 0, 0, 0.8)';
+            context.beginPath(); context.ellipse(-12, -5, flareW, 4, 0, 0, Math.PI*2); context.fill();
+            context.beginPath(); context.ellipse(12, -5, flareW, 4, 0, 0, Math.PI*2); context.fill();
+            context.fillStyle = '#fff';
+            context.beginPath(); context.arc(-12, -5, 3, 0, Math.PI*2); context.arc(12, -5, 3, 0, Math.PI*2); context.fill();
         }
 
+        context.globalCompositeOperation = 'source-over';
         if (this.hp < this.maxHp) {
-            const barW = this.width;
-            const hpPct = Math.max(0, this.hp / this.maxHp);
-            context.fillStyle = 'rgba(255,255,255,0.2)';
-            context.fillRect(-barW / 2, -this.height / 2 - 12, barW, 4);
-            context.fillStyle = this.color;
-            context.fillRect(-barW / 2, -this.height / 2 - 12, barW * hpPct, 4);
+            const barW = this.width; const hpPct = Math.max(0, this.hp / this.maxHp);
+            context.fillStyle = 'rgba(255,255,255,0.2)'; context.fillRect(-barW / 2, -this.height / 2 - 15, barW, 4);
+            context.fillStyle = '#ff003c'; context.fillRect(-barW / 2, -this.height / 2 - 15, barW * hpPct, 4);
         }
-
         context.restore();
     }
 }
 
+// ==========================================
+// 7. DANK POWER-UPS
+// ==========================================
 const POWERUP_KINDS = [
-    { id: 'rapidFire', color: '#ffe600', text: 'RAPID SPREAD' },
-    { id: 'shield', color: '#00f3ff', text: 'ENERGY SHIELD' },
-    { id: 'doubleScore', color: '#00ff66', text: '2X CREDITS' }
+    { id: 'rapidFire', color: '#fffb00', text: 'MTN DEW OVERDRIVE', symbol: '⚡' },
+    { id: 'immunity', color: '#00ffff', text: 'PLOT ARMOR', symbol: '🛡️' },
+    { id: 'doubleScore', color: '#39ff14', text: 'STONKS UP', symbol: '📈' },
+    { id: 'heal', color: '#ff003c', text: 'COPIUM DOSE', symbol: '💊' }
 ];
 
 class PowerUpItem {
     constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.radius = 15;
-        this.speed = 1.8;
+        this.x = x; this.y = y; this.radius = 16; this.speed = 2.5;
         this.data = POWERUP_KINDS[Math.floor(Math.random() * POWERUP_KINDS.length)];
-        this.markedForDeletion = false;
-        this.pulse = 0;
+        this.markedForDeletion = false; this.pulse = 0;
     }
     update(dt) {
-        const factor = dt / 16.6;
-        this.y += this.speed * factor;
-        this.pulse += 0.08 * factor;
+        const factor = dt / 16.6; this.y += this.speed * factor; this.pulse += 0.1 * factor;
         if (this.y > ch + 30) this.markedForDeletion = true;
     }
     draw(context) {
-        context.save();
-        context.translate(this.x, this.y);
-        const scale = 1 + Math.sin(this.pulse) * 0.15;
-        context.scale(scale, scale);
-        context.shadowBlur = 18;
-        context.shadowColor = this.data.color;
-
-        context.strokeStyle = this.data.color;
-        context.lineWidth = 2.5;
-        context.beginPath();
-        context.arc(0, 0, this.radius, 0, Math.PI * 2);
-        context.stroke();
-
+        context.save(); context.translate(this.x, this.y);
+        const scale = 1 + Math.sin(this.pulse) * 0.2; context.scale(scale, scale);
+        
+        context.fillStyle = 'rgba(0,0,0,0.8)';
+        context.strokeStyle = this.data.color; context.lineWidth = 3;
+        context.beginPath(); context.arc(0, 0, this.radius, 0, Math.PI * 2); context.fill(); context.stroke();
+        
         context.fillStyle = this.data.color;
-        context.beginPath();
-        context.arc(0, 0, 5, 0, Math.PI * 2);
-        context.fill();
-
+        context.font = '16px Arial'; context.textAlign = 'center'; context.textBaseline = 'middle';
+        context.fillText(this.data.symbol, 0, 0);
         context.restore();
     }
 }
 
 let alienSpawnTimer = 0;
-
 function updateDifficultyAndSpawn(dt) {
-    const baseInterval = Math.max(450, 2200 - (wave - 1) * 220);
-
+    const baseInterval = Math.max(150, 900 - (wave - 1) * 120);
     alienSpawnTimer += dt;
     if (alienSpawnTimer > baseInterval) {
         alienSpawnTimer = 0;
-        spawnAlienByProgression();
+        let spawnCount = 1 + Math.floor(wave / 3); 
+        for(let i=0; i<spawnCount; i++) {
+            setTimeout(() => { if (currentState === STATE.PLAYING) spawnAlienByProgression(); }, i * 150);
+        }
     }
 }
 
 function spawnAlienByProgression() {
     const rand = Math.random();
     let selectedType = ALIEN_SPECIES.SCOUT;
-
-    if (wave === 1) {
-        selectedType = ALIEN_SPECIES.SCOUT;
-    } else if (wave === 2) {
-        selectedType = rand > 0.45 ? ALIEN_SPECIES.SQUID : ALIEN_SPECIES.SCOUT;
-    } else if (wave === 3) {
-        if (rand > 0.6) selectedType = ALIEN_SPECIES.SWARMER;
-        else if (rand > 0.3) selectedType = ALIEN_SPECIES.SQUID;
-        else selectedType = ALIEN_SPECIES.SCOUT;
-    } else {
-        if (rand > 0.75) selectedType = ALIEN_SPECIES.DREADNOUGHT;
-        else if (rand > 0.5) selectedType = ALIEN_SPECIES.SWARMER;
-        else if (rand > 0.25) selectedType = ALIEN_SPECIES.SQUID;
-        else selectedType = ALIEN_SPECIES.SCOUT;
-    }
-
+    if (wave === 1) selectedType = ALIEN_SPECIES.SCOUT;
+    else if (wave === 2) selectedType = rand > 0.45 ? ALIEN_SPECIES.SQUID : ALIEN_SPECIES.SCOUT;
+    else if (wave === 3) selectedType = rand > 0.6 ? ALIEN_SPECIES.SWARMER : (rand > 0.3 ? ALIEN_SPECIES.SQUID : ALIEN_SPECIES.SCOUT);
+    else selectedType = rand > 0.75 ? ALIEN_SPECIES.DREADNOUGHT : (rand > 0.5 ? ALIEN_SPECIES.SWARMER : (rand > 0.25 ? ALIEN_SPECIES.SQUID : ALIEN_SPECIES.SCOUT));
     aliens.push(new Alien(selectedType, 1.0));
 }
 
-function triggerWaveCheck() {
-    const threshold = wave * 380;
-    if (score >= threshold) {
-        wave++;
-        levelEl.innerText = `WAVE ${wave}`;
-        displayWaveBanner(`WAVE ${wave}: THREAT ESCALATING`);
+// Dank Upgrades
+const PERMANENT_UPGRADES = [
+    { id: 'hp', text: "COPIUM OVERDOSE\n+50 Max Sanity & Full Repair", action: () => { player.maxHealth += 50; player.health = player.maxHealth; player.updateHealthUI(); } },
+    { id: 'fire', text: "SWEATY TRYHARD\n-15% Weapon Delay", action: () => { player.fireDelay *= 0.85; } },
+    { id: 'speed', text: "NARUTO RUN\n+20% Ship Speed", action: () => { player.speed *= 1.2; } },
+    { id: 'multi', text: "MORE DAKKA\n+1 Twin Blaster", action: () => { player.extraShots += 1; } },
+    { id: 'immunity', text: "DIAMOND HANDS\nInstantly Deploy Plot Armor", action: () => { player.powerups.immunity = 15000; refreshPowerupDisplay(); } }
+];
+let activeUpgradeChoices = [];
+
+function checkWaveProgress() {
+    let progressPct = (currentWavePoints / wavePointsNeeded) * 100;
+    progressBar.style.width = `${Math.min(progressPct, 100)}%`;
+
+    if (currentWavePoints >= wavePointsNeeded) {
+        currentState = STATE.LEVELUP;
         Sound.playPowerup();
         
-        // Random Powerup awarded upon clearing the wave
-        let levelUpPowerup = new PowerUpItem(cw / 2, -20);
-        levelUpPowerup.speed = 2.5; // drops a bit faster to be rewarding
-        powerups.push(levelUpPowerup);
+        let shuffled = [...PERMANENT_UPGRADES].sort(() => 0.5 - Math.random());
+        activeUpgradeChoices = [shuffled[0], shuffled[1]];
+        
+        document.getElementById('upg-btn-1').innerText = activeUpgradeChoices[0].text;
+        document.getElementById('upg-btn-2').innerText = activeUpgradeChoices[1].text;
+        document.getElementById('level-up-menu').classList.remove('hidden');
     }
 }
 
+function applyUpgrade(index) {
+    activeUpgradeChoices[index].action();
+    
+    wave++;
+    currentWavePoints = 0;
+    wavePointsNeeded = 500 + (wave * 300); // gets harder fast
+    progressBar.style.width = '0%';
+    levelEl.innerText = `LEVEL ${wave}`;
+    
+    aliens = []; bullets = []; powerups = [];
+    alienSpawnTimer = 0;
+
+    document.getElementById('level-up-menu').classList.add('hidden');
+    displayWaveBanner(`LEVEL ${wave}: BRAINROT ESCALATES`);
+    currentState = STATE.PLAYING;
+}
+
+document.getElementById('upg-btn-1').addEventListener('click', () => applyUpgrade(0));
+document.getElementById('upg-btn-2').addEventListener('click', () => applyUpgrade(1));
+
 function displayWaveBanner(text) {
-    waveBanner.innerText = text;
-    waveBanner.style.opacity = '1';
+    waveBanner.innerText = text; waveBanner.style.opacity = '1';
     waveBanner.style.transform = 'translate(-50%, -50%) scale(1.1)';
-    setTimeout(() => {
-        waveBanner.style.opacity = '0';
-        waveBanner.style.transform = 'translate(-50%, -50%) scale(0.9)';
-    }, 1800);
+    setTimeout(() => { waveBanner.style.opacity = '0'; waveBanner.style.transform = 'translate(-50%, -50%) scale(0.9)'; }, 2000);
 }
 
 function refreshPowerupDisplay() {
     const list = [];
-    if (player.powerups.rapidFire > 0) list.push('<span style="color:var(--neon-yellow)">RAPID 5-WAY</span>');
-    if (player.powerups.shield > 0) list.push('<span style="color:var(--neon-cyan)">SHIELD UP</span>');
-    if (player.powerups.doubleScore > 0) list.push('<span style="color:var(--neon-green)">2X SCORE</span>');
+    if (player.powerups.rapidFire > 0) list.push('<span style="color:var(--neon-yellow)">MTN DEW ACTIVE</span>');
+    if (player.powerups.immunity > 0) list.push('<span style="color:var(--neon-cyan)">PLOT ARMOR ON</span>');
+    if (player.powerups.doubleScore > 0) list.push('<span style="color:var(--neon-green)">STONKS 📈</span>');
 
     if (list.length > 0) {
-        activePowerupEl.innerHTML = list.join(' • ');
-        activePowerupEl.style.opacity = '1';
+        activePowerupEl.innerHTML = list.join(' • '); activePowerupEl.style.opacity = '1';
     } else {
         activePowerupEl.style.opacity = '0';
     }
 }
 
+// ==========================================
+// 8. COLLISION & LOGIC
+// ==========================================
 function testAABB(b1, b2) {
     return (
-        b1.x - b1.width / 2 < b2.x + b2.width / 2 &&
-        b1.x + b1.width / 2 > b2.x - b2.width / 2 &&
-        b1.y - b1.height / 2 < b2.y + b2.height / 2 &&
-        b1.y + b1.height / 2 > b2.y - b2.height / 2
+        b1.x - b1.width / 2 < b2.x + b2.width / 2 && b1.x + b1.width / 2 > b2.x - b2.width / 2 &&
+        b1.y - b1.height / 2 < b2.y + b2.height / 2 && b1.y + b1.height / 2 > b2.y - b2.height / 2
     );
 }
 
@@ -1006,26 +1033,24 @@ function handleAllCollisions() {
         if (b.markedForDeletion) continue;
         for (let a of aliens) {
             if (a.markedForDeletion) continue;
-
             if (testAABB(b, a)) {
-                b.markedForDeletion = true;
-                a.hp--;
-                spawnAlienExplosion(b.x, b.y, a.color, 4);
+                b.markedForDeletion = true; a.hp--;
+                spawnExplosion(b.x, b.y, a.color, 5);
 
                 if (a.hp <= 0) {
                     a.markedForDeletion = true;
-                    const isBig = a.type === 'dreadnought';
-                    spawnAlienExplosion(a.x, a.y, a.color, isBig ? 35 : 18, isBig);
+                    const isBig = a.type === 'boss';
+                    spawnExplosion(a.x, a.y, a.color, isBig ? 35 : 15, isBig);
                     Sound.playAlienExplosion(isBig);
 
                     const multiplier = player.powerups.doubleScore > 0 ? 2 : 1;
                     score += a.scoreVal * multiplier;
+                    currentWavePoints += a.scoreVal; 
+                    
                     scoreEl.innerText = score;
-                    triggerWaveCheck();
+                    checkWaveProgress();
 
-                    if (Math.random() < 0.10) {
-                        powerups.push(new PowerUpItem(a.x, a.y));
-                    }
+                    if (Math.random() < 0.08) powerups.push(new PowerUpItem(a.x, a.y));
                 }
                 break;
             }
@@ -1036,9 +1061,9 @@ function handleAllCollisions() {
         if (a.markedForDeletion) continue;
         if (testAABB(player, a)) {
             a.markedForDeletion = true;
-            spawnAlienExplosion(a.x, a.y, a.color, 25);
+            spawnExplosion(a.x, a.y, a.color, 30);
             Sound.playAlienExplosion(true);
-            player.takeDamage(20);
+            player.takeDamage(25);
         }
     }
 
@@ -1047,20 +1072,27 @@ function handleAllCollisions() {
         const dist = Math.hypot(player.x - pu.x, player.y - pu.y);
         if (dist < player.width / 2 + pu.radius) {
             pu.markedForDeletion = true;
-            player.powerups[pu.data.id] = 9000;
             Sound.playPowerup();
-            refreshPowerupDisplay();
-            spawnAlienExplosion(pu.x, pu.y, pu.data.color, 16);
+            
+            if (pu.data.id === 'heal') {
+                player.health = Math.min(player.maxHealth, player.health + 50);
+                player.updateHealthUI();
+            } else {
+                player.powerups[pu.data.id] = 12000; // 12 seconds
+                refreshPowerupDisplay();
+            }
+            spawnExplosion(pu.x, pu.y, pu.data.color, 20);
         }
     }
 }
 
+// ==========================================
+// 9. CORE GAME LOOP
+// ==========================================
 function update(dt, now) {
     if (currentState !== STATE.PLAYING) return;
 
     player.update(dt, now);
-
-    stars.forEach(s => s.update(dt));
     bullets.forEach(b => b.update(dt));
     aliens.forEach(a => a.update(dt));
     particles.forEach(p => p.update(dt));
@@ -1076,22 +1108,18 @@ function update(dt, now) {
 }
 
 function render() {
-    bgCtx.fillStyle = 'rgba(4, 2, 10, 0.35)';
-    bgCtx.fillRect(0, 0, cw, ch);
-    stars.forEach(s => s.draw(bgCtx));
+    bgCtx.clearRect(0, 0, cw, ch);
+    drawNeonGrid(bgCtx, globalTime);
 
     ctx.clearRect(0, 0, cw, ch);
-
     if (currentState === STATE.MENU) return;
 
     powerups.forEach(pu => pu.draw(ctx));
     bullets.forEach(b => b.draw(ctx));
     aliens.forEach(a => a.draw(ctx));
     particles.forEach(p => p.draw(ctx));
-
-    if (player.health > 0) {
-        player.draw(ctx);
-    }
+    
+    if (player.health > 0) player.draw(ctx);
 }
 
 function gameLoop(timestamp) {
@@ -1099,63 +1127,70 @@ function gameLoop(timestamp) {
     let dt = timestamp - lastTime;
     if (dt > 100) dt = 16.6; 
     lastTime = timestamp;
+    globalTime += dt;
 
     update(dt, timestamp);
     render();
-
     requestAnimationFrame(gameLoop);
 }
 
+// ==========================================
+// 10. GAME INIT & CONTROLS
+// ==========================================
 const startMenu = document.getElementById('start-menu');
 const pauseMenu = document.getElementById('pause-menu');
 const gameOverMenu = document.getElementById('game-over-menu');
+const pauseBtn = document.getElementById('pause-btn');
+
+resize();
 
 function startNewGame() {
     Sound.init();
-    score = 0;
-    wave = 1;
-    scoreEl.innerText = '0';
-    levelEl.innerText = 'WAVE 1';
-    bullets = [];
-    aliens = [];
-    particles = [];
-    powerups = [];
+    score = 0; wave = 1;
+    currentWavePoints = 0; wavePointsNeeded = 500;
+    progressBar.style.width = '0%';
+    
+    scoreEl.innerText = '0'; levelEl.innerText = 'LEVEL 1';
+    bullets = []; aliens = []; particles = []; powerups = [];
     alienSpawnTimer = 0;
 
     player.init();
-
     startMenu.classList.add('hidden');
     pauseMenu.classList.add('hidden');
     gameOverMenu.classList.add('hidden');
+    document.getElementById('level-up-menu').classList.add('hidden');
 
-    displayWaveBanner('WAVE 1: INVASION BEGINS');
+    pauseBtn.innerText = 'TOUCH GRASS';
+    displayWaveBanner('LEVEL 1: THE SIMPS ARRIVE');
     currentState = STATE.PLAYING;
 }
 
 function togglePause() {
+    if (currentState === STATE.LEVELUP || currentState === STATE.MENU || currentState === STATE.GAMEOVER) return;
     if (currentState === STATE.PLAYING) {
         currentState = STATE.PAUSED;
         pauseMenu.classList.remove('hidden');
+        pauseBtn.innerText = 'RESUME';
     } else if (currentState === STATE.PAUSED) {
         currentState = STATE.PLAYING;
         pauseMenu.classList.add('hidden');
+        pauseBtn.innerText = 'TOUCH GRASS';
     }
 }
 
-function triggerGameOver() {
+async function triggerGameOver() {
     currentState = STATE.GAMEOVER;
     Sound.playAlienExplosion(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
         gameOverMenu.classList.remove('hidden');
         document.getElementById('final-score').innerText = score;
-
         const hiMsg = document.getElementById('new-highscore-msg');
         if (score > highScore) {
             highScore = score;
-            localStorage.setItem('alienInvasion_hi', highScore);
             highScoreEl.innerText = highScore;
             hiMsg.classList.remove('hidden');
+            await saveHighScore(highScore);
         } else {
             hiMsg.classList.add('hidden');
         }
@@ -1165,15 +1200,19 @@ function triggerGameOver() {
 document.getElementById('start-btn').addEventListener('click', startNewGame);
 document.getElementById('resume-btn').addEventListener('click', togglePause);
 document.getElementById('restart-btn').addEventListener('click', startNewGame);
-document.getElementById('pause-btn').addEventListener('click', togglePause);
+pauseBtn.addEventListener('click', togglePause);
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && currentState === STATE.PLAYING) togglePause();
+});
+
+const GAME_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'Space', 'KeyA', 'KeyD', 'KeyP', 'Escape']);
 
 window.addEventListener('keydown', e => {
+    if (GAME_KEYS.has(e.code)) e.preventDefault(); 
     if (e.code === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.ArrowLeft = true;
     if (e.code === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.ArrowRight = true;
-    if (e.code === 'Space') {
-        keys.Space = true;
-        if (currentState === STATE.MENU) startNewGame();
-    }
+    if (e.code === 'Space') { keys.Space = true; if (currentState === STATE.MENU) startNewGame(); }
     if (e.code === 'KeyP' || e.code === 'Escape') togglePause();
 });
 
@@ -1187,27 +1226,14 @@ const bindTouch = (el, keyName) => {
     el.addEventListener('touchstart', e => { e.preventDefault(); keys[keyName] = true; }, { passive: false });
     el.addEventListener('touchend', e => { e.preventDefault(); keys[keyName] = false; }, { passive: false });
 };
-
 bindTouch(document.getElementById('btn-left'), 'ArrowLeft');
 bindTouch(document.getElementById('btn-right'), 'ArrowRight');
 
 const shootBtn = document.getElementById('btn-shoot');
-shootBtn.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if (currentState === STATE.PLAYING) keys.Space = true;
-    else if (currentState === STATE.MENU) startNewGame();
-}, { passive: false });
-
-shootBtn.addEventListener('touchend', e => {
-    e.preventDefault();
-    keys.Space = false;
-}, { passive: false });
-
-for (let i = 0; i < 90; i++) stars.push(new Star(true));
+shootBtn.addEventListener('touchstart', e => { e.preventDefault(); if (currentState === STATE.PLAYING) keys.Space = true; else if (currentState === STATE.MENU) startNewGame(); }, { passive: false });
+shootBtn.addEventListener('touchend', e => { e.preventDefault(); keys.Space = false; }, { passive: false });
 
 requestAnimationFrame(gameLoop);
 </script>
 </body>
 </html>
-
-```
